@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RoadGuard AI</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Top Navigation Bar -->
+        <header class="top-nav glass-panel">
+            <div class="nav-left">
+                <i class="fa-solid fa-shield-halved text-blue"></i>
+            </div>
+            <div class="nav-center">
+                <h1>Bangalore Smart Roads</h1>
+            </div>
+            <div class="nav-right">
+                <i class="fa-regular fa-moon theme-toggle" id="theme-toggle" style="margin-right: 15px;"
+                    title="Toggle Dark Mode"></i>
+                <i class="fa-regular fa-bell"></i>
+                <span class="notification-badge"></span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+
+            <!-- VIEW 1: Live Hazard Map -->
+            <section id="view-map" class="view active">
+                <div class="map-background">
+                    <!-- Hazard Pins -->
+                    <div class="pin pin-red" style="top: 30%; left: 40%;">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <div class="pulse"></div>
+                    </div>
+                    <div class="pin pin-yellow" style="top: 55%; left: 70%;">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div class="pin pin-green" style="top: 70%; left: 20%;">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                </div>
+
+                <!-- Floating Action Button -->
+                <button class="fab btn-primary" id="btn-report-hazard">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Report Hazard</span>
+                </button>
+
+                <!-- Bottom Panel (Map View) -->
+                <div class="bottom-panel glass-panel slide-up">
+                    <div class="panel-header">
+                        <h2>Nearby Hazards</h2>
+                    </div>
+                    <div class="hazard-cards-scroller">
+                        <div class="hazard-card">
+                            <div class="hazard-icon bg-red-light text-red">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div class="hazard-info">
+                                <h3>Severe Pothole</h3>
+                                <p>Severity: 92/100</p>
+                            </div>
+                            <div class="hazard-meta">
+                                <span>150m</span>
+                                <span>2h ago</span>
+                            </div>
+                        </div>
+                        <div class="hazard-card">
+                            <div class="hazard-icon bg-yellow-light text-yellow">
+                                <i class="fa-solid fa-road-spikes"></i>
+                            </div>
+                            <div class="hazard-info">
+                                <h3>Uneven Surface</h3>
+                                <p>Severity: 45/100</p>
+                            </div>
+                            <div class="hazard-meta">
+                                <span>300m</span>
+                                <span>5h ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: Report Hazard Screen -->
+            <section id="view-report" class="view">
+                <div class="camera-preview">
+                    <div class="camera-ui">
+                        <i class="fa-solid fa-expand camera-focus"></i>
+                        <p class="camera-hint">Align hazard within frame</p>
+                    </div>
+                </div>
+
+                <div class="report-controls glass-panel slide-up">
+                    <div class="capture-actions">
+                        <button class="btn-icon outline"><i class="fa-regular fa-image"></i></button>
+                        <button class="btn-capture">
+                            <div class="capture-inner"></div>
+                        </button>
+                        <button class="btn-icon outline"><i class="fa-solid fa-bolt"></i></button>
+                    </div>
+
+                    <div class="auto-fields">
+                        <div class="field-item">
+                            <i class="fa-solid fa-location-crosshairs text-blue"></i>
+                            <div class="field-text">
+                                <span class="label">Location</span>
+                                <span class="value">MG Road Intersection, 560001</span>
+                            </div>
+                        </div>
+                        <div class="field-item">
+                            <i class="fa-regular fa-clock text-blue"></i>
+                            <div class="field-text">
+                                <span class="label">Time</span>
+                                <span class="value" id="current-time">10:42 AM, Today</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ai-analysis-panel">
+                        <div class="ai-header">
+                            <i class="fa-solid fa-robot text-blue"></i>
+                            <h3>AI Analysis</h3>
+                        </div>
+                        <div class="ai-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Severity Score</span>
+                                <div class="score-bar">
+                                    <div class="score-fill bg-red" style="width: 85%;"></div>
+                                </div>
+                                <span class="metric-value text-red">85/100 Critical</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Traffic Density</span>
+                                <div class="density-indicators">
+                                    <div class="dot active"></div>
+                                    <div class="dot active"></div>
+                                    <div class="dot active"></div>
+                                    <div class="dot"></div>
+                                    <div class="dot"></div>
+                                </div>
+                                <span class="metric-value">High</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary full-width mt-4" id="btn-submit-report">Submit Hazard Report</button>
+                </div>
+            </section>
+
+            <!-- VIEW 3: Community Engagement Screen -->
+            <section id="view-community" class="view">
+                <div class="community-header">
+                    <h2>Community Road Guardians</h2>
+                    <p>Top reporters making our city safer</p>
+                </div>
+
+                <!-- User Level Card -->
+                <div class="user-level-card glass-panel">
+                    <div class="user-profile">
+                        <div class="avatar bg-blue-light text-blue">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div class="user-details">
+                            <h3>Your Profile</h3>
+                            <p>Level 4: Civic Hero</p>
+                        </div>
+                        <div class="user-score">
+                            <span>1,250 pt</span>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-labels">
+                            <span>Level 4</span>
+                            <span>250 to Level 5</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-green" style="width: 80%;"></div>
+                        </div>
+                    </div>
+                    <div class="badges">
+                        <div class="badge-item active"><i class="fa-solid fa-medal"></i> Civic Hero</div>
+                        <div class="badge-item"><i class="fa-solid fa-shield"></i> Road Protector</div>
+                        <div class="badge-item disabled"><i class="fa-solid fa-crown"></i> Community Guardian</div>
+                    </div>
+                </div>
+
+                <!-- Leaderboard -->
+                <div class="leaderboard glass-panel">
+                    <div class="leaderboard-item rank-1">
+                        <div class="rank">🥇</div>
+                        <div class="avatar-small"><img src="https://i.pravatar.cc/150?img=11" alt="User"></div>
+                        <div class="lb-info">
+                            <h4>Sarah Jenkins</h4>
+                            <p>142 Reports</p>
+                        </div>
+                        <div class="lb-score">15,420</div>
+                    </div>
+
+                    <div class="leaderboard-item rank-2">
+                        <div class="rank">🥈</div>
+                        <div class="avatar-small"><img src="https://i.pravatar.cc/150?img=12" alt="User"></div>
+                        <div class="lb-info">
+                            <h4>Ravi Kumar</h4>
+                            <p>128 Reports</p>
+                        </div>
+                        <div class="lb-score">13,900</div>
+                    </div>
+
+                    <div class="leaderboard-item rank-3">
+                        <div class="rank">🥉</div>
+                        <div class="avatar-small"><img src="https://i.pravatar.cc/150?img=5" alt="User"></div>
+                        <div class="lb-info">
+                            <h4>Priya Sharma</h4>
+                            <p>95 Reports</p>
+                        </div>
+                        <div class="lb-score">10,250</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" data-target="view-map">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>Map</span>
+            </a>
+            <a href="#" class="nav-item" data-target="view-report">
+                <i class="fa-solid fa-camera"></i>
+                <span>Report</span>
+            </a>
+            <a href="#" class="nav-item" data-target="view-community">
+                <i class="fa-solid fa-trophy"></i>
+                <span>Community</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+# RoadGuard AI Backend System Design
+
+## Overview
+The RoadGuard AI backend is designed to efficiently manage crowdsourced civic data. A primary challenge in pothole reporting platforms is redundant data—multiple citizens reporting the same pothole. This backend architecture focuses on duplicate detection, data optimization, and lifecycle management to maintain a clean and performant database.
+
+## 1. Duplicate Detection System
+
+To prevent redundant records, the system intercepts new submissions and evaluates them against existing open reports.
+
+### Detection Criteria
+When a new report arrives, the system executes a match pipeline:
+1. **Geospatial Check:** Queries the database for active potholes within a `10-20 meter` radius of the new report's GPS coordinates using PostGIS (or a similar geospatial extension).
+2. **Temporal Check:** Verifies the `Last_reported_time` and `Repair_status`. If a nearby pothole is currently marked "Open" or "In Progress", it's a candidate for deduplication.
+3. **Image Similarity (Optional/Advanced):** If multiple candidates exist, a lightweight perceptual hash (pHash) or AI embedding comparison can be run against the images to confirm they are the same hazard.
+
+### Resolution
+If a match is found, **do not create a new database row.** Instead:
+- Increment the `Report_count` integer on the existing record.
+- Update the `Last_reported_time` to the current timestamp.
+- Optionally append the new user's ID to a `Reporters` array column for gamification tracking.
+
+### Database Schema Example (PostgreSQL)
+```sql
+CREATE TABLE hazards (
+    Pothole_ID UUID PRIMARY KEY,
+    Location GEOMETRY(Point, 4326), -- PostGIS spatial column
+    Image_reference VARCHAR(255),
+    Severity_score INT CHECK(Severity_score >= 0 AND Severity_score <= 100),
+    Report_count INT DEFAULT 1,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Last_reported_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Repair_status VARCHAR(50) DEFAULT 'Reported'
+);
+CREATE INDEX loc_idx ON hazards USING GIST(Location);
+```
+
+## 2. Image Optimization & Storage
+
+Images are the largest consumers of storage in civic reporting apps.
+- **Single Source of Truth:** Only the highest-quality (or first) image is stored as the primary `Image_reference`.
+- **Reference Links:** If subsequent reports of the same pothole include images, they are stored in a separate, highly volatile temporary bucket or discarded entirely if the primary image is deemed sufficient by the AI severity scanner.
+
+## 3. Data Compression Pipeline
+
+Images uploaded from modern smartphones can be 5-10MB each.
+- **Client-Side Compression:** The mobile UI (JavaScript) should compress the image natively before network transmission to save bandwidth.
+- **Server-Side Processing:** A background worker (e.g., AWS Lambda, Celery) intercepts uploads, strips EXIF data (except GPS), converts the image to modern formats like **WebP**, and resizes it to a maximum dimension (e.g., 1080px width). This reduces file sizes by 80-90% before storing in an S3 bucket.
+
+## 4. Geospatial Clustering Algorithm
+
+To provide city planners with a macroscopic view of road degradation, individual pothole reports are clustered into "Hazard Zones".
+- **Algorithm:** **DBSCAN** (Density-Based Spatial Clustering of Applications with Noise) is ideal here. It groups points that are closely packed together and marks outliers.
+- **Execution:** Run as a nightly batch job via a cron worker.
+- **Benefit:** If 50 potholes exist on a 1km stretch of road, DBSCAN will cluster them, allowing the city to prioritize full road resurfacing rather than patching 50 individual holes.
+
+## 5. Cleanup & Lifecycle System
+
+To prevent the active database from bloating with historical data:
+- **State Changes:** When the city updates the `Repair_status` to "Completed".
+- **Archiving Rule:** A scheduled daily job queries for records where `Repair_status = 'Completed'` AND the `updated_at` timestamp is older than `30 days`.
+- **Action:** 
+  1. Move the database row to an `archived_hazards` table (or cold storage like S3 Parquet files) for historical analytics.
+  2. Delete the row from the active `hazards` table.
+  3. Move associated images to an Infrequent Access storage tier (e.g., S3 Glacier) to dramatically cut storage costs.
+
+---
+*Goal Achieved: Minimized redundant data, highly compressed storage footprint, and maintained accurate, actionable hazard tracking for the smart city.*
