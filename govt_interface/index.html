@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoadGuard AI Municipal Control Center</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Dashboard Header -->
+        <header class="dashboard-header">
+            <div class="logo">
+                <i class="ri-radar-line neon-text-blue"></i>
+                <h1>ROADGUARD AI <span class="neon-text-blue">CONTROL CENTER</span></h1>
+            </div>
+            <div class="header-right">
+                <div class="time-display" id="clock">00:00:00</div>
+                <div class="system-status">
+                    <span class="status-dot healthy"></span>
+                    <span>System Online</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- KPI Section -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon blue"><i class="ri-alert-fill"></i></div>
+                <div class="kpi-info">
+                    <h3>Total Hazards Detected</h3>
+                    <div class="kpi-value" id="kpi-total-hazards">342</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon red"><i class="ri-error-warning-fill"></i></div>
+                <div class="kpi-info">
+                    <h3>Critical Hazards</h3>
+                    <div class="kpi-value neon-text-red" id="kpi-critical-hazards">27</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon orange"><i class="ri-time-line"></i></div>
+                <div class="kpi-info">
+                    <h3>Avg Repair Time</h3>
+                    <div class="kpi-value" id="kpi-avg-repair">2.8 <span class="unit">days</span></div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon green"><i class="ri-shield-check-fill"></i></div>
+                <div class="kpi-info">
+                    <h3>Road Safety Score</h3>
+                    <div class="kpi-value neon-text-green" id="kpi-safety-score">78%</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Map Panel -->
+            <div class="panel map-panel">
+                <div class="panel-header">
+                    <h2><i class="ri-map-2-line"></i> City Damage Heatmap</h2>
+                    <div class="panel-actions">
+                        <button class="btn btn-outline btn-sm">Filter</button>
+                    </div>
+                </div>
+                <div class="panel-content map-container" id="city-map">
+                    <!-- Leaflet map goes here -->
+                </div>
+            </div>
+
+            <!-- Analytics Panels -->
+            <div class="panel analytics-panel">
+                <div class="panel-header">
+                    <h2><i class="ri-bar-chart-box-line"></i> Performance Analytics</h2>
+                </div>
+                <div class="panel-content charts-container">
+                    <div class="chart-box">
+                        <canvas id="monthlyTrendChart"></canvas>
+                    </div>
+                    <div class="chart-box mt-3">
+                        <canvas id="repairSourceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repair Management Panel (spanning full width below map/analytics) -->
+            <div class="panel full-width repair-panel">
+                <div class="panel-header">
+                    <h2><i class="ri-tools-fill"></i> Active Repair Management</h2>
+                    <div class="panel-actions">
+                        <button class="btn btn-primary btn-sm" id="btn-simulate-report">Simulate Incoming Report</button>
+                    </div>
+                </div>
+                <div class="panel-content table-container">
+                    <table class="data-table" id="repair-table">
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Location</th>
+                                <th>Severity</th>
+                                <th>Assigned Crew</th>
+                                <th>Est. Cost</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Modal Triggered via JS -->
+        <div class="alert-overlay hidden" id="alert-modal">
+            <div class="alert-box">
+                <div class="alert-header">
+                    <i class="ri-alarm-warning-line neon-text-red spin"></i> 
+                    <h2>EMERGENCY PRIORITY <span id="alert-priority-level"></span></h2>
+                </div>
+                <div class="alert-body">
+                    <p><strong>Location:</strong> <span id="alert-location"></span></p>
+                    <p><strong>Severity Score:</strong> <span id="alert-severity" class="neon-text-red"></span></p>
+                    <p><strong>Reports Received:</strong> <span id="alert-reports"></span></p>
+                </div>
+                <div class="alert-footer">
+                    <button class="btn btn-red" onclick="dismissAlert()">Acknowledge & Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
